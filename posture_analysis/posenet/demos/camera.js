@@ -303,9 +303,9 @@ function detectPoseInRealTime(video, net) {
     // scores
     poses.forEach(({pose}) => {
 
-      score = pose.score;
-      keypoints = pose.keypoints;
-      diagnosis = weightedDistanceMatching(translate(pose,good_posture))
+      var score = pose.score;
+      var keypoints = pose.keypoints;
+      var diagnosis = weightedDistanceMatching(translate(pose,good_posture))
 
       if (score >= minPoseConfidence) {
         if (guiState.output.showPoints) {
