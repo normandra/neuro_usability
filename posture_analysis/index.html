@@ -1,0 +1,74 @@
+<html>
+  <head>
+    <!-- Load TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.7"></script>
+    <!-- Load Posenet -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet@0.1.2"></script>
+ </head>
+
+  <body>
+    <img id='posture' src='./images/posture.jpg '/>
+    <br/>
+  </body>
+  <!-- Place your code in the script tag below. You can also use an external .js file -->
+  <script>
+
+    var good_posture = [367.5150914510091,69.05551400718848,372.94991404215494,63.54835351967713,375.9051284154256,65.32146634303683,393.6361511230469,62.38536432669865,388.78107299804685,67.08108457193335,401.3009012858073,118.51238532481847,392.3893127441406,116.4543274685555,399.5026570638021,182.2631653591805,379.50825932820635,180.9529487324948,389.03334655761716,240.09613568950985,384.6726837158203,237.68611534403567,393.1534098307292,242.2128440255446,397.64501139322914,244.71448716286307,398.9922281901042,350.1212639393153,405.92043151855466,358.27339900479774,407.25774103800455,436.1445778494554,406.30414555867515,432.0993064785399,0.8842004537582397,0.9263512492179871,0.42392289638519287,0.8580721616744995,0.1326199471950531,0.9756171703338623,0.8547353148460388,0.5667084455490112,0.670185387134552,0.9140894412994385,0.8773156404495239,0.8297626376152039,0.8542234301567078,0.7809146046638489,0.77833092212677,0.761524498462677,0.6569552421569824,0.7497370260603288]
+
+    function weightedDistanceMatching(poseVector1, poseVector2) {
+      let vector1PoseXY = poseVector1.slice(0, 34);
+      let vector1Confidences = poseVector1.slice(34, 51);
+      let vector1ConfidenceSum = poseVector1.slice(51, 52);
+
+      let vector2PoseXY = poseVector2.slice(0, 34);
+
+      // First summation
+      let summation1 = 1 / vector1ConfidenceSum;
+
+      // Second summation
+      let summation2 = 0;
+      for (let i = 0; i < vector1PoseXY.length; i++) {
+        let tempConf = Math.floor(i / 2);
+        let tempSum = vector1Confidences[tempConf] * Math.abs(vector1PoseXY[i] - vector2PoseXY[i]);
+        summation2 = summation2 + tempSum;
+      }
+
+      return summation1 * summation2;
+    }
+
+    function translate(pose){
+      var translated_keypoints = [];
+      pose.keypoints.forEach(function(keypoint){
+        translated_keypoints.push(keypoint.position.x)
+        translated_keypoints.push(keypoint.position.y)
+      })
+
+      pose.keypoints.forEach(function(keypoint){
+        translated_keypoints.push(keypoint.score)
+      })
+
+      translated_keypoints.push(pose.score)
+      
+      return translated_keypoints
+    }
+
+    var imageScaleFactor = 0.5;
+    var flipHorizontal = false;
+    var outputStride = 16;
+    var maxPoseDetections = 2;
+
+    var imageElement = document.getElementById('posture');
+
+    posenet.load().then(function(net){
+      return net.estimateMultiplePoses(imageElement, 0.5, flipHorizontal, outputStride, maxPoseDetections)
+    }).then(function(poses){
+
+      poses.forEach(function(pose) {
+        document.body.innerHTML = document.body.innerHTML + JSON.stringify(pose) + "<br/><br/><br/><br/>";
+        document.body.innerHTML = document.body.innerHTML + translate(pose) + "<br/><br/><br/><br/>";
+        console.log(weightedDistanceMatching(translate(pose),good_posture))
+      })
+
+    })
+  </script>
+</html>
