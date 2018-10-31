@@ -4,6 +4,10 @@
 <head>
     <title>PoseNet - Camera Feed Demo</title>
     <style>
+    .classification {
+        font-size: 100px;
+    }
+
     .footer {
         position: fixed;
         left: 0;
@@ -43,6 +47,9 @@
         ">
         </video>
         <canvas id="output" />
+    </div>
+    <div id='classification' class='classification'>
+        Bad Posture
     </div>
     <div class="footer">
         <div class="footer-text">

@@ -46,18 +46,18 @@ function weightedDistanceMatching(poseVector1, poseVector2) {
   return summation1 * summation2;
 }
 
-function translate(pose){
+function translate(keypoints,score){
   var translated_keypoints = [];
-  pose.keypoints.forEach(function(keypoint){
+  keypoints.forEach(function(keypoint){
     translated_keypoints.push(keypoint.position.x)
     translated_keypoints.push(keypoint.position.y)
   })
 
-  pose.keypoints.forEach(function(keypoint){
+  keypoints.forEach(function(keypoint){
     translated_keypoints.push(keypoint.score)
   })
 
-  translated_keypoints.push(pose.score)
+  translated_keypoints.push(score)
   
   return translated_keypoints
 }
@@ -301,11 +301,16 @@ function detectPoseInRealTime(video, net) {
     // For each pose (i.e. person) detected in an image, loop through the poses
     // and draw the resulting skeleton and keypoints if over certain confidence
     // scores
-    poses.forEach(({pose}) => {
+    poses.forEach(({score,keypoints}) => {
 
-      var score = pose.score;
-      var keypoints = pose.keypoints;
-      var diagnosis = weightedDistanceMatching(translate(pose,good_posture))
+      var diagnosis = weightedDistanceMatching(translate(keypoints,score),good_posture)
+      console.log(diagnosis)
+
+      if (diagnosis <= 2500){
+        document.getElementById('classification').innerHTML = "Good Posture"
+      }else{
+        document.getElementById('classification').innerHTML = "Bad Posture"
+      }
 
       if (score >= minPoseConfidence) {
         if (guiState.output.showPoints) {
